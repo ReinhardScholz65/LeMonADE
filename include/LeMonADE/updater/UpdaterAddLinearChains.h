@@ -58,7 +58,8 @@ class UpdaterAddLinearChains: public UpdaterAbstractCreate<IngredientsType>
   typedef UpdaterAbstractCreate<IngredientsType> BaseClass;
 
 public:
-  UpdaterAddLinearChains(IngredientsType& ingredients_, uint32_t NChain_, uint32_t NMonoPerChain_, int32_t type1_=1, int32_t type2_=2, bool IsSolvent=false);
+  UpdaterAddLinearChains(IngredientsType& ingredients_, uint32_t NChain_, uint32_t NMonoPerChain_, 
+                         int32_t type1_=1, int32_t type2_=2, bool IsSolvent=false);
 
   virtual void initialize();
   virtual bool execute();

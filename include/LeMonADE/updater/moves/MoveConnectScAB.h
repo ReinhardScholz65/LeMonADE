@@ -25,8 +25,8 @@ along with LeMonADE.  If not, see <http://www.gnu.org/licenses/>.
 
 --------------------------------------------------------------------------------*/
 
-#ifndef LEMONADE_UPDATER_MOVES_MOVECONNECTSC_H
-#define LEMONADE_UPDATER_MOVES_MOVECONNECTSC_H
+#ifndef LEMONADE_UPDATER_MOVES_MOVECONNECTSCAB_H
+#define LEMONADE_UPDATER_MOVES_MOVECONNECTSCAB_H
 #include <limits>
 #include <LeMonADE/updater/moves/MoveConnectBase.h>
 
@@ -34,7 +34,7 @@ along with LeMonADE.  If not, see <http://www.gnu.org/licenses/>.
 /**
  * @file
  *
- * @class MoveConnectSc
+ * @class MoveConnectScAB
  *
  * @brief Standard local bfm-move on simple cubic lattice for the scBFM.
  *
@@ -42,10 +42,10 @@ along with LeMonADE.  If not, see <http://www.gnu.org/licenses/>.
  **/
 /*****************************************************************************/
 
-class MoveConnectSc:public MoveConnectBase<MoveConnectSc>
+class MoveConnectScAB:public MoveConnectBase<MoveConnectScAB>
 {
 public:
-  MoveConnectSc(){
+  MoveConnectScAB(){
     shellPositions[0]=VectorInt3( 2, 0, 0);
     shellPositions[1]=VectorInt3(-2, 0, 0);
     shellPositions[2]=VectorInt3( 0, 2, 0);
@@ -94,7 +94,7 @@ private:
  * @param ing A reference to the IngredientsType - mainly the system
  **/
 template <class IngredientsType>
-void MoveConnectSc::init(const IngredientsType& ing)
+void MoveConnectScAB::init(const IngredientsType& ing)
 {
   this->resetProbability();
 
@@ -117,7 +117,7 @@ void MoveConnectSc::init(const IngredientsType& ing)
  * @param index index of the monomer to be connected
  **/
 template <class IngredientsType>
-void MoveConnectSc::init(const IngredientsType& ing, uint32_t index)
+void MoveConnectScAB::init(const IngredientsType& ing, uint32_t index)
 {
   this->resetProbability();
 
@@ -125,12 +125,12 @@ void MoveConnectSc::init(const IngredientsType& ing, uint32_t index)
   if( (index >= 0) && (index <= (ing.getMolecules().size()-1)) )
     this->setIndex( index );
   else
-    throw std::runtime_error("MoveConnectSc::init(ing, index): index out of range!");
+    throw std::runtime_error("MoveConnectScAB::init(ing, index): index out of range!");
 
   //draw direction
   VectorInt3 randomDir(shellPositions[ this->randomNumbers.r250_rand32() % 6]);
   this->setDir(randomDir);
-  this->setPartner(ing.getIdFromLattice(ing.getMolecules()[this->getIndex()]+randomDir));
+  this->setPartner(ing.getIdFromLattice(ing.getMolecules()[this->getIndex()]+randomDir));  
 }
 
 /*****************************************************************************/
@@ -144,7 +144,7 @@ void MoveConnectSc::init(const IngredientsType& ing, uint32_t index)
  * @param bondpartner index of the monomer to connect to 
  **/
 template <class IngredientsType>
-void MoveConnectSc::init(const IngredientsType& ing, uint32_t index, VectorInt3 dir )
+void MoveConnectScAB::init(const IngredientsType& ing, uint32_t index, VectorInt3 dir )
 {
   this->resetProbability();
 
@@ -152,7 +152,7 @@ void MoveConnectSc::init(const IngredientsType& ing, uint32_t index, VectorInt3 
   if( (index >= 0) && (index <= (ing.getMolecules().size()-1)) )
     this->setIndex( index );
   else
-    throw std::runtime_error("MoveConnectSc::init(ing, index, bondpartner): index out of range!");
+    throw std::runtime_error("MoveConnectScAB::init(ing, index, bondpartner): index out of range!");
 
   //set direction
   if(dir==shellPositions[0] ||
@@ -163,7 +163,7 @@ void MoveConnectSc::init(const IngredientsType& ing, uint32_t index, VectorInt3 
     dir==shellPositions[5]  )
     this->setDir(dir);
   else
-    throw std::runtime_error("MoveLocalSc::init(ing, dir): direction vector out of range!");
+    throw std::runtime_error("MoveLocalScAB::init(ing, dir): direction vector out of range!");
   this->setPartner(ing.getIdFromLattice(ing.getMolecules()[this->getIndex()]+dir));
 }
 
@@ -177,7 +177,7 @@ void MoveConnectSc::init(const IngredientsType& ing, uint32_t index, VectorInt3 
  * @return True if move is valid. False, otherwise.
  **/
 template <class IngredientsType>
-bool MoveConnectSc::check(IngredientsType& ing)
+bool MoveConnectScAB::check(IngredientsType& ing)
 {
   /**
    * @todo Think about this approach. Maybe we can put this statement somewhere else? 
@@ -198,28 +198,15 @@ bool MoveConnectSc::check(IngredientsType& ing)
  * @param ing A reference to the IngredientsType - mainly the system
  **/
 template< class IngredientsType>
-void MoveConnectSc::apply(IngredientsType& ing)
+void MoveConnectScAB::apply(IngredientsType& ing)
 {
 	///@todo Think about the applying of move. Esp. make this independent of the order to avoid confusion!!
 	///@todo check if it makes any difference in this case?!
 
-    //write reactive partners of different type A (type=1) and B (type=2) to file
-    //
-    std::cout << std::endl;
-    std::cout << "reactive monomer pair:"  << std::endl;
-   
-    std::cout << "monomer " << this->getIndex() << " is type " << ing.getMolecules()[this->getIndex()].getAttributeTag() << std::endl;
+    //check if reactive partners are of different type A (type=1) and B (type=2) has to be applied in MoveConnectScAB::check
+    //but not here
     
-    std::cout << "monomer " << this->getPartner() << " is type " << ing.getMolecules()[this->getPartner()].getAttributeTag() << std::endl;
-   
-	//FIRST bond is inserted, under condition that reactive partners are of different type, THEN all features are applied:
-    //if(ing.getMolecules()[this->getIndex()].getAttributeTag()!=ing.getMolecules()[this->getPartner()].getAttributeTag())
-    //{
-	//    ing.modifyMolecules().connect(this->getIndex(),this->getPartner());
-  	//    ing.applyMove(ing,*this);
-    //}
-
-    //FIRST bond is inserted
+	//FIRST bond is inserted 
 	ing.modifyMolecules().connect(this->getIndex(),this->getPartner());
 	
 	//THEN all features are applied 
@@ -228,7 +215,7 @@ void MoveConnectSc::apply(IngredientsType& ing)
 	
 	//the next line can produce a lot of output
 	//thus use only if needed:
-	std::cout << " Connect: " << this->getIndex() << " to " << this->getPartner() << " at ("<<ing.modifyMolecules()[this->getIndex()] << ") - ("<< ing.modifyMolecules()[this->getPartner()] <<")"<< std::endl;
+	std::cout << " ConnectAB: " << this->getIndex() << " to " << this->getPartner() << " at ("<<ing.modifyMolecules()[this->getIndex()] << ") - ("<< ing.modifyMolecules()[this->getPartner()] <<")"<< std::endl;
 }
 
 #endif

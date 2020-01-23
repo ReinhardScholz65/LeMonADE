@@ -25,21 +25,21 @@ along with LeMonADE.  If not, see <http://www.gnu.org/licenses/>.
 
 --------------------------------------------------------------------------------*/
 
-#ifndef LEMONADE_UPDATER_UPDATERSIMPLECONNECTION_H
-#define LEMONADE_UPDATER_UPDATERSIMPLECONNECTION_H
+#ifndef LEMONADE_UPDATER_UPDATERSIMPLECONNECTIONAB_H
+#define LEMONADE_UPDATER_UPDATERSIMPLECONNECTIONAB_H
 
 
 #include <LeMonADE/updater/moves/MoveLocalBase.h>
 #include <LeMonADE/utility/RandomNumberGenerators.h>
 #include<LeMonADE/updater/AbstractUpdater.h>
-#include <LeMonADE/updater/moves/MoveConnectSc.h>
+#include <LeMonADE/updater/moves/MoveConnectScAB.h>
 
 /**
  * @file
  *
- * @class UpdaterSimpleConnection
+ * @class UpdaterSimpleConnectionAB
  *
- * @brief Simple simulation updater for generic polyrotaxanes.
+ * @brief Simple simulation updater for generic polyrotaxanes, reaction shall only occur between monomers A and B.
  *
  * @details It takes the type of move as template argument MoveType
  * and the number of mcs to be executed as argument for the constructor
@@ -49,7 +49,7 @@ along with LeMonADE.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 template<class IngredientsType,class MoveType, class ConnectionMoveType>
-class UpdaterSimpleConnection:public AbstractUpdater
+class UpdaterSimpleConnectionAB:public AbstractUpdater
 {
 
 public:
@@ -59,7 +59,7 @@ public:
    * @param ing a reference to the IngredientsType - mainly the system
    * @param steps MCS per cycle to performed by execute()
    */
-  UpdaterSimpleConnection(IngredientsType& ing,uint32_t steps = 1 )
+  UpdaterSimpleConnectionAB(IngredientsType& ing,uint32_t steps = 1 )
   :ingredients(ing),nsteps(steps),NReactedSites(0),NReactiveSites(0){}
 
   
@@ -129,7 +129,7 @@ private:
  * @brief 
  */
 template<class IngredientsType,class MoveType, class ConnectionMoveType>
-bool UpdaterSimpleConnection<IngredientsType,MoveType,ConnectionMoveType>::execute()
+bool UpdaterSimpleConnectionAB<IngredientsType,MoveType,ConnectionMoveType>::execute()
 {
   
 // 	time_t startTimer = time(NULL); //in seconds
@@ -169,14 +169,20 @@ bool UpdaterSimpleConnection<IngredientsType,MoveType,ConnectionMoveType>::execu
 // 				}
 			}
 		}
-		
+				
 		for(size_t m=0;m<ReactiveMonomerIDs.size();m++){
             uint32_t ID ( ReactiveMonomerIDs[rng.r250_rand32() % ReactiveMonomerIDs.size()] );
             // collision reaction
             connectionMove.init(ingredients,ID);
             if ( connectionMove.check(ingredients) )
             {
-                std::cout << "Apply Connection move for " << ID << std::endl ;
+                // following line: write attribute of monomer with index ID:
+                std::cout << "monomer " << ID+1 << " type " <<  ingredients.getMolecules()[ID].getAttributeTag()<< std::endl;
+                // missing:
+                // find index of reactive neighbor of monomer with index m likely to react
+                // check whether monomer with number ID and reactive neighbor are of different type
+                //
+                std::cout << "Apply Connection move for " << ID+1 << std::endl ;
                 connectionMove.apply(ingredients);
                 NReactedSites+=2; // to check
             }
@@ -192,7 +198,7 @@ bool UpdaterSimpleConnection<IngredientsType,MoveType,ConnectionMoveType>::execu
 };
 
 template<class IngredientsType,class MoveType, class ConnectionMoveType>
-void  UpdaterSimpleConnection<IngredientsType,MoveType,ConnectionMoveType>::initialize()
+void  UpdaterSimpleConnectionAB<IngredientsType,MoveType,ConnectionMoveType>::initialize()
 {
 	for(size_t i = 0 ; i < ingredients.getMolecules().size(); i++ )
 	{
@@ -206,7 +212,7 @@ void  UpdaterSimpleConnection<IngredientsType,MoveType,ConnectionMoveType>::init
 			{
 				uint32_t neighbor(ingredients.getMolecules().getNeighborIdx(i,n));
 				if( ingredients.getMolecules()[neighbor].isReactive() )
-					NReactedSites++;
+					    NReactedSites++;
 				else
 					nIrreversibleBonds++;
 			}
@@ -219,9 +225,9 @@ void  UpdaterSimpleConnection<IngredientsType,MoveType,ConnectionMoveType>::init
 	if ( NReactiveSites == 0  )
 	{
 	  std::stringstream errormessage;
-	  errormessage << "UpdaterSimpleConnection::initialize(): The number of possible reactive sites is zero. \n"
+	  errormessage << "UpdaterSimpleConnectionAB::initialize(): The number of possible reactive sites is zero. \n"
 		       << "Check if the system is correctly setup with reactivity!";
 	  throw std::runtime_error(errormessage.str());
 	} 
 };
-#endif 	/*LEMONADE_UPDATER_UPDATERSIMPLECONNECTION_H*/
+#endif 	/*LEMONADE_UPDATER_UPDATERSIMPLECONNECTIONAB_H*/

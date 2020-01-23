@@ -25,19 +25,19 @@ along with LeMonADE.  If not, see <http://www.gnu.org/licenses/>.
 
 --------------------------------------------------------------------------------*/
 
-#ifndef LEMONADE_UPDATER_UPDATERSIMPLECONNECTION_H
-#define LEMONADE_UPDATER_UPDATERSIMPLECONNECTION_H
+#ifndef LEMONADE_UPDATER_SETREACTIVITYSTARENDS_H
+#define LEMONADE_UPDATER_SETREACTIVITYSTARENDS_H
 
 
 #include <LeMonADE/updater/moves/MoveLocalBase.h>
 #include <LeMonADE/utility/RandomNumberGenerators.h>
-#include<LeMonADE/updater/AbstractUpdater.h>
+#include <LeMonADE/updater/AbstractUpdater.h>
 #include <LeMonADE/updater/moves/MoveConnectSc.h>
 
 /**
  * @file
  *
- * @class UpdaterSimpleConnection
+ * @class UpdaterSetReactivityStarEnds
  *
  * @brief Simple simulation updater for generic polyrotaxanes.
  *
@@ -49,7 +49,7 @@ along with LeMonADE.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 template<class IngredientsType,class MoveType, class ConnectionMoveType>
-class UpdaterSimpleConnection:public AbstractUpdater
+class UpdaterSetReactivityStarEnds:public AbstractUpdater
 {
 
 public:
@@ -59,11 +59,25 @@ public:
    * @param ing a reference to the IngredientsType - mainly the system
    * @param steps MCS per cycle to performed by execute()
    */
-  UpdaterSimpleConnection(IngredientsType& ing,uint32_t steps = 1 )
-  :ingredients(ing),nsteps(steps),NReactedSites(0),NReactiveSites(0){}
-
   
- 
+  /**
+   * additonal paramneters needed to administrate number of stars, number of branches, etc.:
+   * 
+   * @param NStar_ number of stars in ingredients
+   * @param NMonoPerStar_ number of monomers in each star
+   * @param NBranchPerStar_ number of branches in each star
+   * @param NMonoPerBranch_ number of monomers in each branch (excluding central monomer)
+   * @param type1_ attribute tag of "even" monomers
+   * @param type2_ attribute tag of "odd" monomers
+   **/
+
+  UpdaterSetReactivityStarEnds(IngredientsType& ing,uint32_t steps = 1 )
+  :ingredients(ing),nsteps(steps),
+                    uint32_t NStar_, uint32_t NMonoPerStar_, 
+                    uint32_t NBranchPerStar_, uint32_t NMonoPerBranch_, 
+                    int32_t type1_=1, int32_t type2_=2, bool IsSolvent=false,
+                    NReactedSites(0),NReactiveSites(0){}
+
   /**
    * @brief This checks all used Feature and applies all Feature if all conditions are met.
    *
@@ -121,15 +135,13 @@ private:
 
   //! Number of mcs to be executed
   uint32_t nsteps;
-  //! vector containing all reactive MonomersID which are capable to connect further
-  std::vector<uint32_t> ReactiveMonomerIDs;
 
 };
 /**Implementation of the member functions
  * @brief 
  */
 template<class IngredientsType,class MoveType, class ConnectionMoveType>
-bool UpdaterSimpleConnection<IngredientsType,MoveType,ConnectionMoveType>::execute()
+bool UpdaterSetReactivityStarEnds<IngredientsType,MoveType,ConnectionMoveType>::execute()
 {
   
 // 	time_t startTimer = time(NULL); //in seconds
@@ -150,57 +162,40 @@ bool UpdaterSimpleConnection<IngredientsType,MoveType,ConnectionMoveType>::execu
 			{
 				move.apply(ingredients);
 			}
-// 			else // move is reject due to e.g. excluded volume, bond length, Metropolis etc
+			else // move is reject due to e.g. excluded volume, bond length, Metropolis etc
 			{
 				// as we connect as face-to-face colliding algorithm
 				// use the move direction in previous check as destination direction
-// 				if( ingredients.getMolecules()[move.getIndex()].isReactive() )
-// 				{
-//                     std::cout << "Choose reactive monomer of ID" << move.getIndex() << std::cout ;
-// 					// collision reaction
-// 					connectionMove.init(ingredients,move.getIndex(), 2*move.getDir());
-// 
-// 					if ( connectionMove.check(ingredients) )
-// 					{
-//                         std::cout << "Apply Connection move for " << move.getIndex() << std::cout ;
-// 						connectionMove.apply(ingredients);
-// 						NReactedSites+=2; // to check
-// 					}
-// 				}
+				if( ingredients.getMolecules()[move.getIndex()].isReactive() )
+				{
+					// collision reaction
+					connectionMove.init(ingredients,move.getIndex(), 2*move.getDir());
+
+					if ( connectionMove.check(ingredients) )
+					{
+						connectionMove.apply(ingredients);
+						NReactedSites+=2; // to check
+					}
+				}
 			}
 		}
-		
-		for(size_t m=0;m<ReactiveMonomerIDs.size();m++){
-            uint32_t ID ( ReactiveMonomerIDs[rng.r250_rand32() % ReactiveMonomerIDs.size()] );
-            // collision reaction
-            connectionMove.init(ingredients,ID);
-            if ( connectionMove.check(ingredients) )
-            {
-                std::cout << "Apply Connection move for " << ID << std::endl ;
-                connectionMove.apply(ingredients);
-                NReactedSites+=2; // to check
-            }
-        }
-		
 
 		ingredients.modifyMolecules().setAge(ingredients.getMolecules().getAge()+1);
 	}
- 	std::cout <<"Conversion at "<<ingredients.getMolecules().getAge() << " is " << getConversion()  << std::endl;
+// 	std::cout <<"Conversion at "<<ingredients.getMolecules().getAge() << " is " << getConversion()  << std::endl;
 // 	std::cout<<"connection mcs "<<ingredients.getMolecules().getAge() << " with " << (((1.0*nsteps)*ingredients.getMolecules().size())/(difftime(time(NULL), startTimer)) ) << " [attempted connections/s]" <<std::endl;
 // 	std::cout<<"connection mcs "<<ingredients.getMolecules().getAge() << " passed time " << ((difftime(time(NULL), startTimer)) ) << " with " << nsteps << "connection MCS "<<std::endl;
 	return false;
 };
 
 template<class IngredientsType,class MoveType, class ConnectionMoveType>
-void  UpdaterSimpleConnection<IngredientsType,MoveType,ConnectionMoveType>::initialize()
+void  UpdaterSetReactivityStarEnds<IngredientsType,MoveType,ConnectionMoveType>::initialize()
 {
 	for(size_t i = 0 ; i < ingredients.getMolecules().size(); i++ )
 	{
 		if ( ingredients.getMolecules()[i].isReactive() )
 		{
 			uint32_t NLinks(ingredients.getMolecules().getNumLinks(i));
-            if ( NLinks < ingredients.getMolecules()[i].getNumMaxLinks() )
-                ReactiveMonomerIDs.push_back(i);
 			uint32_t nIrreversibleBonds=0;
 			for (uint32_t n = 0 ; n < NLinks ;n++)
 			{

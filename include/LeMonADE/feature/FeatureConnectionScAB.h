@@ -25,15 +25,14 @@ along with LeMonADE.  If not, see <http://www.gnu.org/licenses/>.
 
 --------------------------------------------------------------------------------*/
 
-#ifndef LEMONADE_FEATURE_FEATURECONNECTIONSC_H
-#define LEMONADE_FEATURE_FEATURECONNECTIONSC_H
+#ifndef LEMONADE_FEATURE_FEATURECONNECTIONSCAB_H
+#define LEMONADE_FEATURE_FEATURECONNECTIONSCAB_H
 
 #include <LeMonADE/feature/Feature.h>
 #include <LeMonADE/feature/FeatureExcludedVolumeSc.h>
 #include <LeMonADE/feature/FeatureLatticePowerOfTwo.h>
 #include <LeMonADE/updater/moves/MoveBase.h>
 #include <LeMonADE/updater/moves/MoveConnectBase.h>
-#include <LeMonADE/updater/moves/MoveConnectSc.h>
 #include <LeMonADE/updater/moves/MoveConnectScAB.h>
 #include <LeMonADE/updater/moves/MoveLocalBcc.h>
 #include <LeMonADE/updater/moves/MoveLocalSc.h>
@@ -187,7 +186,7 @@ public:
  * @date   2019/02/05
  * @author Toni
  *
- * @class FeatureConnectionSc
+ * @class FeatureConnectionScAB
  * @brief This Feature add new bonds between monomers.
  *
  * @details Works only in combination with an excluded volume feature
@@ -200,7 +199,7 @@ public:
 //Implementation of the members below					///////
 ///////////////////////////////////////////////////////////////////////////////
 
-class FeatureConnectionSc : public Feature {
+class FeatureConnectionScAB : public Feature {
   
 public:
 	//! This Feature requires a monomer_extensions.
@@ -210,7 +209,7 @@ public:
 //  	typedef LOKI_TYPELIST_1(FeatureExcludedVolumeSc<>) required_features_back;
 
 	//constructor
-	FeatureConnectionSc() :latticeFilledUp(false)
+	FeatureConnectionScAB() :latticeFilledUp(false)
 	{connectionLattice.setupLattice();}
 	
 	/**
@@ -242,8 +241,7 @@ public:
 	//! Export the relevant functionality for writing bfm-files to the responsible writer object
 	template<class IngredientsType>
 	void exportWrite(AnalyzerWriteBfmFile<IngredientsType>& fileWriter) const;
-
-    //! check move for basic move - always true
+	//! check move for basic move - always true
 	template<class IngredientsType>
 	bool checkMove(const IngredientsType& ingredients, const MoveBase& move) const{ return true;};
 
@@ -251,18 +249,15 @@ public:
 	template<class IngredientsType, class SpecializedMove> 
 	bool checkMove(const IngredientsType& ingredients, const MoveConnectBase<SpecializedMove>& move) const;
 
-    //! check bas connect move - always true 
-	template<class IngredientsType>
-	bool checkMove(const IngredientsType& ingredients, const MoveConnectScAB& move) const {return true;};
-   
 	//! check bas connect move - always true 
 	template<class IngredientsType>
 	bool checkMove(const IngredientsType& ingredients, const MoveLocalSc& move) const {return true;};
-    
+	
 	//! check bas connect move - always true 
 	template<class IngredientsType>
 	bool checkMove(const IngredientsType& ingredients, const MoveLocalScDiag& move) const {return true;};
-		
+	
+	
 	//! check bas connect move - always true 
 	template<class IngredientsType>
 	bool checkMove(const IngredientsType& ingredients, const MoveLocalBcc& move) const {throw std::runtime_error("*****FeatureConnectionSc::check MoveLocalBcc: wrong lattice type ... \n"); return false;};
@@ -282,10 +277,6 @@ public:
 	//!apply move for the scBFM connection move for connection
 	template<class IngredientsType, class SpecializedMove> 
 	void applyMove(IngredientsType& ing, const MoveConnectBase<SpecializedMove>& move);
-	
-	//!apply move for the scBFM connection move for connection of different monomers A (type=1) and B (type=2)
-	template<class IngredientsType>
-	void applyMove(IngredientsType& ing, const MoveConnectScAB& move);	
 	
 	//!apply move for the scBFM local move which changes the lattice
 	template<class IngredientsType>
@@ -340,7 +331,7 @@ protected:
  * @tparam IngredientsType Features used in the system. See Ingredients.
  **/
 template<class IngredientsType>
-void FeatureConnectionSc::exportRead(FileImport< IngredientsType >& fileReader)
+void FeatureConnectionScAB::exportRead(FileImport< IngredientsType >& fileReader)
 {
   fileReader.registerRead("!reactivity",new ReadReactivity<IngredientsType>(fileReader.getDestination()));
 }
@@ -356,14 +347,14 @@ void FeatureConnectionSc::exportRead(FileImport< IngredientsType >& fileReader)
  * @param fileWriter File writer for the bfm-file.
  */
 template<class IngredientsType>
-void FeatureConnectionSc::exportWrite(AnalyzerWriteBfmFile< IngredientsType >& fileWriter) const
+void FeatureConnectionScAB::exportWrite(AnalyzerWriteBfmFile< IngredientsType >& fileWriter) const
 {
   fileWriter.registerWrite("!reactivity",new WriteReactivity<IngredientsType>(fileWriter.getIngredients_()));
 }
 
 /******************************************************************************/
 /**
- * @fn bool FeatureConnectionSc::checkMove( const IngredientsType& ingredients, const MoveConnectSc& move )const
+ * @fn bool FeatureConnectionScAB::checkMove( const IngredientsType& ingredients, const MoveConnectScAB& move )const
  * @brief Returns true for all moves other than the ones that have specialized versions of this function.
  * This dummy function is implemented for generality.
  * @details  it might make a difference for the speed if the order of statements is switched for different systems parameters
@@ -373,7 +364,7 @@ void FeatureConnectionSc::exportWrite(AnalyzerWriteBfmFile< IngredientsType >& f
  */
 /******************************************************************************/
 template<class IngredientsType, class SpecializedMove> 
-bool FeatureConnectionSc ::checkMove(const IngredientsType& ingredients, const MoveConnectBase<SpecializedMove>& move) const
+bool FeatureConnectionScAB ::checkMove(const IngredientsType& ingredients, const MoveConnectBase<SpecializedMove>& move) const
 {
   
   	if (!latticeFilledUp)
@@ -400,7 +391,7 @@ bool FeatureConnectionSc ::checkMove(const IngredientsType& ingredients, const M
 }
 /******************************************************************************/
 /**
- * @fn void FeatureConnectionSc ::applyMove(IngredientsType& ing, const MoveConnectSc& move)
+ * @fn void FeatureConnectionScAB ::applyMove(IngredientsType& ing, const MoveConnectSc& move)
  * @brief This function applies for unknown moves other than the ones that have specialized versions of this function.
  * It does nothing and is implemented for generality.
  *
@@ -409,7 +400,7 @@ bool FeatureConnectionSc ::checkMove(const IngredientsType& ingredients, const M
  */
 /******************************************************************************/
 template<class IngredientsType, class SpecializedMove> 
-void FeatureConnectionSc  ::applyMove(IngredientsType& ing,const MoveConnectBase<SpecializedMove>& move)
+void FeatureConnectionScAB  ::applyMove(IngredientsType& ing,const MoveConnectBase<SpecializedMove>& move)
 {
   //because in the most cases we have an irreversible connection we can erase the lattice entry 
   const typename IngredientsType::molecules_type& molecules=ing.getMolecules();
@@ -423,27 +414,14 @@ void FeatureConnectionSc  ::applyMove(IngredientsType& ing,const MoveConnectBase
 }
 /******************************************************************************/
 /**
- * @fn void FeatureConnectionSc ::applyMove(IngredientsType& ing, const MoveConnectScAB& move)
- *
- * @param [in] ingredients A reference to the IngredientsType - mainly the system
- * @param [in] move Connection move only for different monomers A (type=1) and B (type=2)
- */
-/******************************************************************************/
-template<class IngredientsType>
-void FeatureConnectionSc  ::applyMove(IngredientsType& ing,const MoveConnectScAB& move)
-{
-    //no code yet
-}
-/******************************************************************************/
-/**
- * @fn void FeatureConnectionSc ::applyMove(IngredientsType& ing, const MoveLocalSc& move)
+ * @fn void FeatureConnectionScAB ::applyMove(IngredientsType& ing, const MoveLocalSc& move)
  *
  * @param [in] ingredients A reference to the IngredientsType - mainly the system
  * @param [in] move General move other than MoveLocalSc or MoveLocalBcc.
  */
 /******************************************************************************/
 template<class IngredientsType>
-void FeatureConnectionSc  ::applyMove(IngredientsType& ing,const MoveLocalSc& move)
+void FeatureConnectionScAB  ::applyMove(IngredientsType& ing,const MoveLocalSc& move)
 {
   VectorInt3 oldPos=ing.getMolecules()[move.getIndex()];
   VectorInt3 direction=move.getDir();
@@ -452,14 +430,14 @@ void FeatureConnectionSc  ::applyMove(IngredientsType& ing,const MoveLocalSc& mo
 }
 /******************************************************************************/
 /**
- * @fn void FeatureConnectionSc ::applyMove(IngredientsType& ing, const MoveLocalScDiag& move)
+ * @fn void FeatureConnectionScAB ::applyMove(IngredientsType& ing, const MoveLocalScDiag& move)
  *
  * @param [in] ingredients A reference to the IngredientsType - mainly the system
  * @param [in] move General move other than MoveLocalSc or MoveLocalBcc.
  */
 /******************************************************************************/
 template<class IngredientsType>
-void FeatureConnectionSc  ::applyMove(IngredientsType& ing,const MoveLocalScDiag& move)
+void FeatureConnectionScAB  ::applyMove(IngredientsType& ing,const MoveLocalScDiag& move)
 {
   VectorInt3 oldPos=ing.getMolecules()[move.getIndex()];
   VectorInt3 direction=move.getDir();
@@ -468,14 +446,14 @@ void FeatureConnectionSc  ::applyMove(IngredientsType& ing,const MoveLocalScDiag
 }
 /******************************************************************************/
 /**
- * @fn void FeatureConnectionSc ::applyMove(IngredientsType& ing, const MoveAddMonomerSc<TagType>& move)
+ * @fn void FeatureConnectionScAB ::applyMove(IngredientsType& ing, const MoveAddMonomerSc<TagType>& move)
  *
  * @param [in] ingredients A reference to the IngredientsType - mainly the system
  * @param [in] move General move other than MoveLocalSc or MoveLocalBcc.
  */
 /******************************************************************************/
 template<class IngredientsType, class TagType>
-void FeatureConnectionSc  ::applyMove(IngredientsType& ing,const MoveAddMonomerSc<TagType>& move)
+void FeatureConnectionScAB  ::applyMove(IngredientsType& ing,const MoveAddMonomerSc<TagType>& move)
 {
   uint32_t MonID(move.getMonomerIndex()); 
   VectorInt3 pos=ing.getMolecules()[MonID];
@@ -484,7 +462,7 @@ void FeatureConnectionSc  ::applyMove(IngredientsType& ing,const MoveAddMonomerS
 }
 /******************************************************************************/
 /**
- * @fn void FeatureConnectionSc ::synchronize(IngredientsType& ingredients)
+ * @fn void FeatureConnectionScAB ::synchronize(IngredientsType& ingredients)
  * @brief Synchronizes the lattice occupation with the rest of the system
  * by calling the private function fillLattice.
  *
@@ -492,7 +470,7 @@ void FeatureConnectionSc  ::applyMove(IngredientsType& ing,const MoveAddMonomerS
  */
 /******************************************************************************/
 template<class IngredientsType>
-void FeatureConnectionSc  ::synchronize(IngredientsType& ingredients)
+void FeatureConnectionScAB  ::synchronize(IngredientsType& ingredients)
 {
 
 	std::cout << "FeatureConnectionSc::synchronizing lattice occupation...\n";
@@ -511,7 +489,7 @@ void FeatureConnectionSc  ::synchronize(IngredientsType& ingredients)
  * */
 /******************************************************************************/
 template<class IngredientsType>
-void FeatureConnectionSc::fillLattice(IngredientsType& ingredients)
+void FeatureConnectionScAB::fillLattice(IngredientsType& ingredients)
 {
   
 	connectionLattice.setupLattice(ingredients.getBoxX(),ingredients.getBoxY(),ingredients.getBoxZ());

@@ -34,6 +34,7 @@ along with LeMonADE.  If not, see <http://www.gnu.org/licenses/>.
 #include <LeMonADE/analyzer/AbstractAnalyzer.h>
 #include <LeMonADE/utility/ResultFormattingTools.h>
 #include <LeMonADE/utility/MonomerGroup.h>
+#include <LeMonADE/utility/DepthIterator.h>
 
 /*************************************************************************
  * definition of AnalyzerRadiusOfGyration class
@@ -110,7 +111,7 @@ public:
 };
 
 /*************************************************************************
- * implementation of memebers
+ * implementation of members
  * ***********************************************************************/
 
 /**
@@ -141,12 +142,21 @@ void AnalyzerRadiusOfGyration<IngredientsType>::initialize()
 {
 	//if no groups are set, use the complete system by default
 	//groups can be set using the provided access function
-	if(groups.size()==0){
-		groups.push_back(MonomerGroup<molecules_type>(ingredients.getMolecules()));
-		for(size_t n=0;n<ingredients.getMolecules().size();n++)
-			groups[0].push_back(n);
+	//
+    if(groups.size()==0){
+	    //
+	    // new version, shall treat different polymer chains or stars separately, and average over these objects at the end
+	    //
+        fill_connected_groups(ingredients.getMolecules(), groups, ingredients.getMolecules(), alwaysTrue() );
+	    //
+	    // old version, sums over all objects while calculating radius of gyration 
+	    //
+        // groups.push_back(MonomerGroup<molecules_type>(ingredients.getMolecules()));
+		// for(size_t n=0;n<ingredients.getMolecules().size();n++)
+		//	groups[0].push_back(n);
 	}
-
+	
+std::cout << "from AnalyzerRadiusOfGyration " << groups.size() << " " << ingredients.getMolecules().size() << std::endl;
 }
 
 /**
