@@ -185,7 +185,9 @@ bool UpdaterSimpleConnection<IngredientsType,MoveType,ConnectionMoveType>::execu
 
 		ingredients.modifyMolecules().setAge(ingredients.getMolecules().getAge()+1);
 	}
- 	std::cout <<"Conversion at "<<ingredients.getMolecules().getAge() << " is " << getConversion()  << std::endl;
+ 	std::cout << NReactedSites <<" "<<NReactiveSites<<" "<<getConversion()<<std::endl;
+	std::cout <<"Conversion at "<<ingredients.getMolecules().getAge() << " is " << NReactedSites <<" "<<NReactiveSites<<" "
+    << getConversion()  << std::endl;
 // 	std::cout<<"connection mcs "<<ingredients.getMolecules().getAge() << " with " << (((1.0*nsteps)*ingredients.getMolecules().size())/(difftime(time(NULL), startTimer)) ) << " [attempted connections/s]" <<std::endl;
 // 	std::cout<<"connection mcs "<<ingredients.getMolecules().getAge() << " passed time " << ((difftime(time(NULL), startTimer)) ) << " with " << nsteps << "connection MCS "<<std::endl;
 	return false;

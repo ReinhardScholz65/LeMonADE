@@ -203,6 +203,15 @@ void MoveConnectScAB::apply(IngredientsType& ing)
 	///@todo Think about the applying of move. Esp. make this independent of the order to avoid confusion!!
 	///@todo check if it makes any difference in this case?!
 
+    //write reactive partners of different type A (type=1) and B (type=2) to file
+    //
+    std::cout << std::endl;
+    std::cout << "reactive monomer pair:"  << std::endl;
+   
+    std::cout << "monomer " << this->getIndex() << " is type " << ing.getMolecules()[this->getIndex()].getAttributeTag() << std::endl;
+    
+    std::cout << "monomer " << this->getPartner() << " is type " << ing.getMolecules()[this->getPartner()].getAttributeTag() << std::endl;
+
     //check if reactive partners are of different type A (type=1) and B (type=2) has to be applied in MoveConnectScAB::check
     //but not here
     
